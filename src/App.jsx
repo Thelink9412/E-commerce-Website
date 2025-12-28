@@ -1,8 +1,9 @@
 import { useEffect, useState, useRef, createContext } from "react";
 import NavBar from "./components/NavBar";
 import { createClient } from '@supabase/supabase-js'
-import { BrowserRouter } from "react-router-dom";
 import ShoppingCartMenu from "./components/ShoppingCartMenu";
+import ProductCard from "./components/ProductCard";
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 
 const supabaseUrl = 'https://ikqlvnaqasirwjhgrxbd.supabase.co'
 const supabaseKey = 'sb_publishable_QKUgd_7ebOKUCsnXlc_wwA_m09ekffz'
@@ -13,6 +14,7 @@ export const UserContext = createContext({})
 function App() {
   const [user, setUser] = useState({});
   const [shoppingCart, setShoppingCart] = useState({})
+  const [products, setProducts] = useState([])
   const initialized = useRef(false);
 
   useEffect(() => {
@@ -20,6 +22,8 @@ function App() {
       initialized.current = true;
       initializeUserSettings();
     }
+
+    loadProducts()
   }, []);
 
   async function initializeUserSettings() {
@@ -51,6 +55,27 @@ function App() {
     }
   }
 
+  async function loadProducts() {
+    const { data, error } = await supabaseClient
+      .from('prodotto')
+      .select(`
+        id_prodotto,
+        categoria,
+        nome,
+        prezzo,
+        disponibilità (
+          url,
+          quantità
+        )
+        `)
+
+    if (error) {
+      console.log("Errore nel caricamento dei prodotti", error?.message);
+    } else {
+      setProducts(data)
+    }
+  }
+
   async function getFisrtRandomUserUser() {
     const { data, error } = await supabaseClient
       .from('account')
@@ -76,10 +101,18 @@ function App() {
           shoppingCart,
           setShoppingCart
         }}>
-          <NavBar/>
+          <NavBar />
           <ShoppingCartMenu />
         </ShoppingCartContext.Provider>
       </UserContext.Provider>
+      <Routes>
+        <Route path='/' element={<div className='products-list'>
+          {products.map(prod => {
+            return <ProductCard key={prod.id_prodotto} name={prod.nome} price={prod.prezzo} url={prod.disponibilità[0].url} stock={prod.disponibilità[0].quantità}/>
+          })}
+        </div>
+        }></Route>
+      </Routes>
     </BrowserRouter>
   );
 }

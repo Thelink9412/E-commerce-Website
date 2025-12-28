@@ -14,21 +14,13 @@ function ShoppingCartMenu() {
     }, [shoppingCart])
 
     return (<>
-        <div className='blur' style={{
-            width: '100vw',
-            height: '100vh',
-            position: 'fixed',
-            top: '0',
-            backgroundColor: 'rgba(0, 0, 0, 0.55)',
-            zIndex: '10',
-            opacity: `${active ? '1' : '0'}`,
-        }}></div>
+        <div className={`blur ${active ? 'is-active' : ''}`} onClick={() => setActive(prev => !prev)}></div>
         <div className={`cart-menu ${active ? 'active' : ''}`}>
             <header className='menu-header'>
-                <img src={cartIcon} alt="Cart" onClick={() => setTimeout(() => setActive(prev => !prev), 100)} />
+                <img src={cartIcon} alt="Cart" onClick={() => setActive(prev => !prev)} />
                 <span>{user.nome_utente}'s Shopping Cart</span>
             </header>
-            <div className='cart-body' style={{opacity: `${active ? '1' : '0'}`}}>
+            <div className='cart-body' style={{ opacity: `${active ? '1' : '0'}` }}>
                 <div className='cart-products-container'>
                     {!shoppingCart.dettagli_del_carrello?.length ?
                         (<span style={{
